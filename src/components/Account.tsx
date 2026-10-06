@@ -1,6 +1,15 @@
 import {useState,useEffect} from 'react';
 import {online,request,loadOnline} from '../store';
-export function Account({children}:{children:React.ReactNode}){const [ready,setReady]=useState(!online),[user,setUser]=useState(''),[checking,setChecking]=useState(online),[error,setError]=useState(''),[change,setChange]=useState(false),[busy,setBusy]=useState(false);useEffect(()=>{if(online)request('login',{method:'POST',body:JSON.stringify({username:'admin',password:''})}).then(async data=>{await loadOnline();setUser(data.username);setReady(true)}).catch(err=>{if(!String(err).includes('请先登录'))setError('无法连接服务器，请刷新重试。')}).finally(()=>setChecking(false))},[]);
-if(checking)return <main className="welcome"><h1>正在读取在线账本…</h1></main>;
-if(!ready)return <main className="welcome"><div className="brand">◷ 时间账户 · 在线版</div><h1>登录你的时间账户。</h1><p>同一个账户，多台设备。数据保存在服务器。</p><form onSubmit={async ev=>{ev.preventDefault();setBusy(true);const f=new FormData(ev.currentTarget);try{const result=await request('login',{method:'POST',body:JSON.stringify({username:f.get('username'),password:''})});await loadOnline();setUser(result.username);setReady(true);setError('')}catch(err){setError(String(err))}finally{setBusy(false)}}}><label>账号<input name="username" defaultValue="admin" autoComplete="username" required/></label><button className="primary" disabled={busy}>{busy?'登录中…':'登录 →'}</button></form>{error&&<p className="error">{error}</p>}</main>;
-return <>{online&&<div className="account-bar"><span>在线共享账本 · 无需密码 · 每次操作自动保存</span></div>}{change&&<section className="account-password"><form onSubmit={async ev=>{ev.preventDefault();const f=new FormData(ev.currentTarget);try{await request('password',{method:'POST',body:JSON.stringify({oldPassword:f.get('old'),newPassword:f.get('new')})});location.reload()}catch(err){setError(String(err))}}}><label>原密码<input name="old" type="password" autoComplete="current-password" required/></label><label>新密码（至少 8 位）<input name="new" type="password" minLength={8} autoComplete="new-password" required/></label><button className="primary">保存并重新登录</button></form>{error&&<p className="error">{error}</p>}</section>}{children}</>}
+export function Account({children}:{children:React.ReactNode}) {
+  const [ready,setReady]=useState(!online);
+  const [error,setError]=useState('');
+  useEffect(()=>{
+    if(!online)return;
+    request('session')
+      .catch(()=>request('login',{method:'POST',body:JSON.stringify({username:'admin',password:''})}))
+      .then(async()=>{await loadOnline();setReady(true)})
+      .catch(()=>setError('暂时无法连接在线账本，请检查网络后重试。'));
+  },[]);
+  if(!ready)return <main className="welcome"><div className="brand">◷ 时间账户</div><h1>{error?'连接暂时中断':'正在读取在线账本…'}</h1>{error&&<><p className="error">{error}</p><button onClick={()=>location.reload()}>重新连接</button></>}</main>;
+  return <>{online&&<div className="account-bar"><span>在线共享账本 · 无需密码 · 手机电脑同步</span></div>}{children}</>;
+}
