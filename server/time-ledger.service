@@ -1,0 +1,23 @@
+[Unit]
+Description=Time Ledger account API
+After=network.target
+
+[Service]
+User=time-ledger
+Group=time-ledger
+WorkingDirectory=/opt/time-ledger/server
+Environment=LEDGER_DB=/var/lib/time-ledger/ledger.sqlite3
+Environment=PORT=5187
+Environment=COOKIE_SECURE=1
+ExecStart=/usr/bin/python3 /opt/time-ledger/server/app.py
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/time-ledger
+
+[Install]
+WantedBy=multi-user.target

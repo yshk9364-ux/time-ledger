@@ -1,0 +1,6 @@
+[Unit]
+Description=Back up Time Ledger SQLite database
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/time-ledger/server/backup.py
+UMask=0077
