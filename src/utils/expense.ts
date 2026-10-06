@@ -1,0 +1,4 @@
+import type {Profile} from '../types';
+import {cumulativeTax} from './tax';
+export function payroll(salary:number,p:Profile){const social=p.socialMode==='off'?0:p.socialMode==='manual'?p.socialFixed:salary*p.socialRatio;const fund=p.fundMode==='off'?0:p.fundMode==='manual'?p.fundFixed:salary*p.fundRatio;const tax=cumulativeTax((salary-social-fund-5000-p.deduction)*12)/12;return {gross:salary,social,fund,tax,net:p.netOverride??salary-social-fund-tax}}
+export function expenses(salary:number,p:Profile){const pay=payroll(salary,p);const rows=p.expenses.map(e=>({...e,amount:e.fixed??Math.max(0,pay.net)*(e.ratio??e.fallbackRatio),source:e.fixed!==undefined?'手动':e.ratio!==undefined?'按比例估算':'默认估算'}));const total=rows.reduce((s,e)=>s+e.amount,0);return {...pay,rows,total,basic:rows.filter(e=>e.necessary).reduce((s,e)=>s+e.amount,0),remaining:pay.net-total}}

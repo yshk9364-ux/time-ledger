@@ -1,0 +1,3 @@
+import type {Profile} from '../types';
+export const defaults = (time:number):Profile => ({id:crypto.randomUUID(),effectiveFrom:time,expenses:[['住房',25,true],['餐饮',20,true],['交通',5,true],['通讯',2,true],['日用品',5,true],['娱乐',5,false],['学习 / 订阅',3,false],['其他',5,false]].map(([name,ratio,necessary])=>({name:String(name),fallbackRatio:Number(ratio)/100,necessary:Boolean(necessary)})),socialMode:'auto',socialRatio:0.105,socialFixed:0,fundMode:'auto',fundRatio:0.07,fundFixed:0,deduction:0,schedule:'double',hours:8,days:5});
+export const taxBrackets = [[36000,.03,0],[144000,.1,2520],[300000,.2,16920],[420000,.25,31920],[660000,.3,52920],[960000,.35,85920],[Infinity,.45,181920]];
