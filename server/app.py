@@ -45,6 +45,7 @@ def valid_ledger(data):
             for k in ('fixed','ratio','fallbackRatio'):
                 if k in e and (not finite(e[k]) or e[k]<0):raise ValueError('无效费用值')
     for e in data.get('extras',[]):
+        if e.get('kind','expense') not in ('income','expense'):raise ValueError('无效收支类型')
         if not finite(e.get('amount')) or e['amount']<=0 or not finite(e.get('timestamp')):raise ValueError('无效额外支出')
     return json.dumps(data,ensure_ascii=False,allow_nan=False,separators=(',',':'))
 class API(BaseHTTPRequestHandler):

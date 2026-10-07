@@ -27,9 +27,9 @@ class AccountTests(unittest.TestCase):
         self.call('/logout','POST',{},cookie);self.assertEqual(self.call('/session',cookie=cookie)[0],401)
     def test_save_restore_and_stale_device_conflict(self):
         cookie=self.login();snapshot=self.call('/ledger',cookie=cookie)[1]
-        ledger={'version':1,'initialSalary':6000,'birthday':'','referenceAge':80,'periods':[],'profiles':[{'effectiveFrom':0,'expenses':[]}],'events':[],'extras':[{'id':'example','timestamp':1,'amount':20,'note':'test'}]}
+        ledger={'version':1,'initialSalary':6000,'birthday':'','referenceAge':80,'periods':[],'profiles':[{'effectiveFrom':0,'expenses':[]}],'events':[],'extras':[{'id':'example','timestamp':1,'amount':20,'note':'test','kind':'income'}]}
         status,data,_=self.call('/ledger','PUT',{'data':ledger,'revision':snapshot['revision']},cookie);self.assertEqual(status,200)
-        loaded=self.call('/ledger',cookie=cookie)[1];self.assertEqual(loaded['data']['extras'][0]['amount'],20)
+        loaded=self.call('/ledger',cookie=cookie)[1];self.assertEqual(loaded['data']['extras'][0]['amount'],20);self.assertEqual(loaded['data']['extras'][0]['kind'],'income')
         self.assertEqual(self.call('/ledger','PUT',{'data':ledger,'revision':snapshot['revision']},cookie)[0],409)
         with sqlite3.connect(self.path) as db:stored=db.execute('SELECT password_hash FROM users').fetchone()[0];self.assertNotEqual(stored,'fixture-password-only')
 if __name__=='__main__':unittest.main()
